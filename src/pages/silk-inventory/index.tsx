@@ -1,26 +1,154 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
-import { silkList, silkRecords } from '@/data/silk';
+import { useWorkshopStore } from '@/store/workshop';
 
 const SilkInventoryPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('丝线库存');
   const [activeCategory, setActiveCategory] = useState('全部');
+  const { silkThreads, silkRecords, addSilkStock, deductSilkStock } = useWorkshopStore();
+
+  useDidShow(() => {
+  });
 
   const categories = useMemo(() => {
-    const cats = ['全部', ...new Set(silkList.map(s => s.category))];
+    const cats = ['全部', ...new Set(silkThreads.map(s => s.category))];
     return cats;
-  }, []);
+  }, [silkThreads]);
 
   const filteredSilk = useMemo(() => {
-    return silkList.filter(s => activeCategory === '全部' || s.category === activeCategory);
-  }, [activeCategory]);
+    return silkThreads.filter(s => activeCategory === '全部' || s.category === activeCategory);
+  }, [activeCategory, silkThreads]);
 
-  const totalStock = silkList.reduce((sum, s) => sum + s.stock, 0);
-  const lowStockCount = silkList.filter(s => s.stock <= s.minStock).length;
-  const categoriesCount = new Set(silkList.map(s => s.category)).size;
+  const totalStock = useMemo(
+    () => silkThreads.reduce((sum, s) => sum + s.stock, 0),
+    [silkThreads]
+  );
+  const lowStockCount = useMemo(
+    () => silkThreads.filter(s => s.stock <= s.minStock).length,
+    [silkThreads]
+  );
+  const categoriesCount = useMemo(
+    () => new Set(silkThreads.map(s => s.category)).size,
+    [silkThreads]
+  );
+
+  const handleStockIn = () => {
+    const silkNames = filteredSilk.map(s => `${s.colorName}（当前${s.stock}${s.unit}）`);
+    Taro.showActionSheet({
+      itemList: silkNames,
+      success: (res) => {
+        const silk = filteredSilk[res.tapIndex];
+        Taro.showModal({
+          title: `${silk.colorName} - 入库`,
+          editable: true,
+          placeholderText: '请输入入库数量',
+          confirmText: '下一步',
+          confirmColor: '#C41E3A',
+          success: (qtyRes) => {
+            if (qtyRes.confirm) {
+              const qty = Number(qtyRes.content);
+              if (!qty || qty <= 0) {
+                Taro.showToast({ title: '请输入有效数量', icon: 'none' });
+                return;
+              }
+              Taro.showModal({
+                title: '备注（选填）',
+                editable: true,
+                placeholderText: '如：采购入库、盘点补入等',
+                confirmText: '确认入库',
+                confirmColor: '#C41E3A',
+                success: (noteRes) => {
+                  if (noteRes.confirm) {
+                    const note = noteRes.content?.trim() || '采购入库';
+                    const success = addSilkStock(silk.id, qty, '管理员', note);
+                    if (success) {
+                      Taro.showToast({ title: `入库成功 +${qty}${silk.unit}`, icon: 'success' });
+                    }
+                  }
+                }
+              });
+            }
+          }
+        });
+      }
+    });
+  };
+
+  const handleStockOut = () => {
+    const availableSilk = filteredSilk.filter(s => s.stock > 0);
+    if (availableSilk.length === 0) {
+      Taro.showToast({ title: '当前分类无可用库存', icon: 'none' });
+      return;
+    }
+    const silkNames = availableSilk.map(s => `${s.colorName}（库存${s.stock}${s.unit}）`);
+    Taro.showActionSheet({
+      itemList: silkNames,
+      success: (res) => {
+        const silk = availableSilk[res.tapIndex];
+        Taro.showModal({
+          title: `${silk.colorName} - 领料`,
+          editable: true,
+          placeholderText: `请输入领料数量（最多${silk.stock}${silk.unit}）`,
+          confirmText: '下一步',
+          confirmColor: '#C41E3A',
+          success: (qtyRes) => {
+            if (qtyRes.confirm) {
+              const qty = Number(qtyRes.content);
+              if (!qty || qty <= 0) {
+                Taro.showToast({ title: '请输入有效数量', icon: 'none' });
+                return;
+              }
+              if (qty > silk.stock) {
+                Taro.showToast({ title: `库存不足，仅剩${silk.stock}${silk.unit}`, icon: 'none' });
+                return;
+              }
+              const remainingAfter = silk.stock - qty;
+              if (remainingAfter < silk.minStock) {
+                Taro.showModal({
+                  title: '⚠️ 库存预警',
+                  content: `领料后库存（${remainingAfter}${silk.unit}）将低于安全线（${silk.minStock}${silk.unit}），是否继续？`,
+                  confirmText: '继续领料',
+                  confirmColor: '#C41E3A',
+                  success: (warnRes) => {
+                    if (warnRes.confirm) {
+                      askForOrderNo(silk.id, qty, silk.unit);
+                    }
+                  }
+                });
+              } else {
+                askForOrderNo(silk.id, qty, silk.unit);
+              }
+            }
+          }
+        });
+      }
+    });
+  };
+
+  const askForOrderNo = (silkId: string, qty: number, unit: string) => {
+    Taro.showModal({
+      title: '关联订单号（选填）',
+      editable: true,
+      placeholderText: '如：JX20260615001',
+      confirmText: '确认领料',
+      confirmColor: '#C41E3A',
+      success: (orderRes) => {
+        if (orderRes.confirm) {
+          const orderNo = orderRes.content?.trim() || undefined;
+          const note = orderNo ? '订单绣制领料' : '日常领料';
+          const success = deductSilkStock(silkId, qty, '管理员', orderNo, note);
+          if (success) {
+            Taro.showToast({ title: `领料成功 -${qty}${unit}`, icon: 'success' });
+          } else {
+            Taro.showToast({ title: '库存不足，领料失败', icon: 'none' });
+          }
+        }
+      }
+    });
+  };
 
   return (
     <View className={styles.page}>
@@ -130,10 +258,10 @@ const SilkInventoryPage: React.FC = () => {
 
       {activeTab === '丝线库存' && (
         <View className={styles.actionBar}>
-          <View className={styles.actionBtn + ' ' + styles.secondary} onClick={() => Taro.showToast({ title: '功能开发中', icon: 'none' })}>
+          <View className={styles.actionBtn + ' ' + styles.secondary} onClick={handleStockIn}>
             丝线入库
           </View>
-          <View className={styles.actionBtn + ' ' + styles.primary} onClick={() => Taro.showToast({ title: '功能开发中', icon: 'none' })}>
+          <View className={styles.actionBtn + ' ' + styles.primary} onClick={handleStockOut}>
             订单领料
           </View>
         </View>

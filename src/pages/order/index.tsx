@@ -1,19 +1,23 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, Input } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
 import OrderCard from '@/components/OrderCard';
-import { orderList } from '@/data/order';
+import { useWorkshopStore } from '@/store/workshop';
 
 const tabs = ['全部', '待派单', '绣制中', '待装裱', '已完成'];
 
 const OrderPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('全部');
   const [searchText, setSearchText] = useState('');
+  const orders = useWorkshopStore(state => state.orders);
+
+  useDidShow(() => {
+  });
 
   const filteredOrders = useMemo(() => {
-    return orderList.filter(o => {
+    return orders.filter(o => {
       const tabMatch = activeTab === '全部' || o.status === activeTab;
       const searchMatch = !searchText ||
         o.orderNo.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -21,14 +25,14 @@ const OrderPage: React.FC = () => {
         (o.sketchName && o.sketchName.includes(searchText));
       return tabMatch && searchMatch;
     });
-  }, [activeTab, searchText]);
+  }, [activeTab, searchText, orders]);
 
-  const stats = [
-    { label: '总订单', value: orderList.length },
-    { label: '待派单', value: orderList.filter(o => o.status === '待派单').length },
-    { label: '绣制中', value: orderList.filter(o => o.status === '绣制中').length },
-    { label: '已完成', value: orderList.filter(o => o.status === '已完成').length }
-  ];
+  const stats = useMemo(() => [
+    { label: '总订单', value: orders.length },
+    { label: '待派单', value: orders.filter(o => o.status === '待派单').length },
+    { label: '绣制中', value: orders.filter(o => o.status === '绣制中').length },
+    { label: '已完成', value: orders.filter(o => o.status === '已完成').length }
+  ], [orders]);
 
   return (
     <View className={styles.page}>

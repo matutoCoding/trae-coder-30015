@@ -2,8 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, Input, Textarea, Image } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import styles from './index.module.scss';
-import { sketchList } from '@/data/sketch';
-import { ProcessType } from '@/types';
+import { useWorkshopStore } from '@/store/workshop';
+import { ProcessType, Customer } from '@/types';
 import dayjs from 'dayjs';
 
 const allProcesses: ProcessType[] = ['双面绣', '乱针绣', '平针绣', '打籽绣', '盘金绣'];
@@ -34,6 +34,10 @@ const sizePresets = [
 const CreateOrderPage: React.FC = () => {
   const router = useRouter();
   const sketchIdFromParam = router.params.sketchId;
+  const { sketches, addOrder } = useWorkshopStore(state => ({
+    sketches: state.sketches,
+    addOrder: state.addOrder
+  }));
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
@@ -52,8 +56,8 @@ const CreateOrderPage: React.FC = () => {
   });
 
   const selectedSketch = useMemo(
-    () => sketchList.find(s => s.id === form.sketchId),
-    [form.sketchId]
+    () => sketches.find(s => s.id === form.sketchId),
+    [form.sketchId, sketches]
   );
 
   const selectedFrame = useMemo(
@@ -140,12 +144,38 @@ const CreateOrderPage: React.FC = () => {
       success: (res) => {
         if (res.confirm) {
           Taro.showLoading({ title: '创建中...' });
+
+          const customer: Customer = {
+            id: `c_${Date.now()}`,
+            name: form.customerName.trim(),
+            phone: form.customerPhone.trim(),
+            address: form.customerAddress?.trim() || undefined
+          };
+
+          const sizeText = form.customSize?.trim() ||
+            (form.selectedSizePreset
+              ? sizePresets.find(s => s.id === form.selectedSizePreset)?.name?.replace(/小品 |中幅 |大幅 |巨幅 /, '')
+              : '') ||
+            (selectedSketch?.size || '定制尺寸');
+
+          const requirementWithExtra = `装裱：${selectedFrame.name}；礼品包装：${selectedGift.name}；${form.requirement.trim()}`;
+
+          const orderId = addOrder({
+            customer,
+            sketchId: form.sketchId || undefined,
+            sketchName: selectedSketch?.name || undefined,
+            sketchImage: selectedSketch?.imageUrl || undefined,
+            customRequirement: requirementWithExtra,
+            size: sizeText,
+            process: form.selectedProcesses,
+            budget: Number(form.budget) || estimatedBudget,
+            deadline: form.deadline
+          });
+
+          Taro.hideLoading();
+          Taro.showToast({ title: '订单创建成功', icon: 'success' });
           setTimeout(() => {
-            Taro.hideLoading();
-            Taro.showToast({ title: '订单创建成功', icon: 'success' });
-            setTimeout(() => {
-              Taro.switchTab({ url: '/pages/order/index' });
-            }, 1500);
+            Taro.redirectTo({ url: `/pages/order-detail/index?id=${orderId}` });
           }, 1000);
         }
       }
@@ -249,7 +279,7 @@ const CreateOrderPage: React.FC = () => {
               <Text>选择绣稿底样</Text>
             </View>
             <View className={styles.sketchList}>
-              {sketchList.map(s => (
+              {sketches.map(s => (
                 <View
                   key={s.id}
                   className={`${styles.sketchItem} ${form.sketchId === s.id ? styles.active : ''}`}

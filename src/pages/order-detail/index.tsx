@@ -1,9 +1,8 @@
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView, Image } from '@tarojs/components';
-import Taro, { useRouter } from '@tarojs/taro';
+import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
-import { orderList } from '@/data/order';
-import { embroidererList } from '@/data/embroiderer';
+import { useWorkshopStore } from '@/store/workshop';
 import { ProgressStage, ProcessType } from '@/types';
 
 const processKnowledge: Record<ProcessType, { desc: string; steps: string[]; level: string }> = {
@@ -74,16 +73,20 @@ const stageOrder: ProgressStage[] = ['准备', '上绷', '绣制', '收尾', '�
 const OrderDetailPage: React.FC = () => {
   const router = useRouter();
   const id = router.params.id;
+  const { orders, embroiderers, advanceStage, addStageLog } = useWorkshopStore();
 
-  const order = useMemo(() => orderList.find(o => o.id === id) || orderList[0], [id]);
+  useDidShow(() => {
+  });
+
+  const order = useMemo(() => orders.find(o => o.id === id) || orders[0], [id, orders]);
 
   const embroidererDetails = useMemo(() => {
     if (!order.embroiderers) return [];
     return order.embroiderers.map(emb => ({
       ...emb,
-      ...embroidererList.find(e => e.id === emb.id)
+      ...embroiderers.find(e => e.id === emb.id)
     }));
-  }, [order.embroiderers]);
+  }, [order.embroiderers, embroiderers]);
 
   const getStageStatus = (stage: ProgressStage) => {
     const currentIdx = stageOrder.indexOf(order.currentStage);
@@ -91,6 +94,58 @@ const OrderDetailPage: React.FC = () => {
     if (idx < currentIdx) return 'done';
     if (idx === currentIdx) return 'active';
     return '';
+  };
+
+  const getNextStages = (): ProgressStage[] => {
+    const currentIdx = stageOrder.indexOf(order.currentStage);
+    return stageOrder.slice(currentIdx + 1);
+  };
+
+  const handleUpdateProgress = () => {
+    const nextStages = getNextStages();
+    if (nextStages.length === 0) {
+      Taro.showToast({ title: '已完成全部阶段', icon: 'none' });
+      return;
+    }
+
+    Taro.showActionSheet({
+      itemList: nextStages.map(s => `推进到「${s}」阶段`),
+      success: (res) => {
+        const targetStage = nextStages[res.tapIndex];
+        Taro.showModal({
+          title: `推进到${targetStage}`,
+          editable: true,
+          placeholderText: '请填写阶段说明（选填）',
+          confirmText: '确认推进',
+          confirmColor: '#C41E3A',
+          success: (modalRes) => {
+            if (modalRes.confirm) {
+              const note = modalRes.content?.trim() || `${targetStage}阶段工作进行中`;
+              const success = advanceStage(order.id, targetStage, note);
+              if (success) {
+                Taro.showToast({ title: '进度已更新', icon: 'success' });
+              }
+            }
+          }
+        });
+      }
+    });
+  };
+
+  const handleAddLog = () => {
+    Taro.showModal({
+      title: '添加阶段日志',
+      editable: true,
+      placeholderText: '记录当前阶段的工作进展...',
+      confirmText: '添加',
+      confirmColor: '#C41E3A',
+      success: (res) => {
+        if (res.confirm && res.content?.trim()) {
+          addStageLog(order.id, order.currentStage, res.content.trim());
+          Taro.showToast({ title: '日志已添加', icon: 'success' });
+        }
+      }
+    });
   };
 
   return (
@@ -317,23 +372,26 @@ const OrderDetailPage: React.FC = () => {
         ) : order.status === '绣制中' ? (
           <View
             className={`${styles.actionBtn} ${styles.primary}`}
-            onClick={() => Taro.showToast({ title: '进度已更新', icon: 'success' })}
+            onClick={handleUpdateProgress}
           >
             更新进度
           </View>
         ) : order.status === '待装裱' ? (
           <View
             className={`${styles.actionBtn} ${styles.primary}`}
-            onClick={() => Taro.showToast({ title: '已通知装裱师', icon: 'success' })}
+            onClick={() => {
+              advanceStage(order.id, '装裱', '装裱师开始装裱工作');
+              Taro.showToast({ title: '已通知装裱师', icon: 'success' });
+            }}
           >
             通知装裱
           </View>
         ) : (
           <View
             className={`${styles.actionBtn} ${styles.primary}`}
-            onClick={() => Taro.showToast({ title: '客户已通知取件', icon: 'success' })}
+            onClick={handleAddLog}
           >
-            通知取件
+            添加日志
           </View>
         )}
       </View>

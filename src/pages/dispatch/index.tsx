@@ -1,13 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
 import EmbroidererCard from '@/components/EmbroidererCard';
 import StatCard from '@/components/StatCard';
-import { embroidererList } from '@/data/embroiderer';
-import { orderList } from '@/data/order';
-import { Order, Embroiderer, ProcessType, EmbroidererLevel } from '@/types';
+import { useWorkshopStore } from '@/store/workshop';
+import { Embroiderer, EmbroidererLevel } from '@/types';
 
 const levelFilters: Array<EmbroidererLevel | '全部'> = ['全部', '大师级', '高级', '中级', '初级'];
 const statusFilters = ['全部', '空闲', '忙碌', '休息'];
@@ -15,32 +14,48 @@ const statusFilters = ['全部', '空闲', '忙碌', '休息'];
 const DispatchPage: React.FC = () => {
   const [activeLevel, setActiveLevel] = useState<EmbroidererLevel | '全部'>('全部');
   const [activeStatus, setActiveStatus] = useState('全部');
-  const [pendingOrder, setPendingOrder] = useState<Order | null>(orderList.find(o => o.status === '待派单') || null);
+  const { orders, embroiderers, dispatchOrder } = useWorkshopStore();
 
-  const idleCount = embroidererList.filter(e => e.status === '空闲').length;
-  const busyCount = embroidererList.filter(e => e.status === '忙碌').length;
-  const masterCount = embroidererList.filter(e => e.level === '大师级').length;
+  useDidShow(() => {
+  });
+
+  const pendingOrder = useMemo(
+    () => orders.find(o => o.status === '待派单') || null,
+    [orders]
+  );
+
+  const idleCount = useMemo(() => embroiderers.filter(e => e.status === '空闲').length, [embroiderers]);
+  const busyCount = useMemo(() => embroiderers.filter(e => e.status === '忙碌').length, [embroiderers]);
+  const masterCount = useMemo(() => embroiderers.filter(e => e.level === '大师级').length, [embroiderers]);
 
   const filteredEmbroiderers = useMemo(() => {
-    return embroidererList.filter(e => {
+    return embroiderers.filter(e => {
       const levelMatch = activeLevel === '全部' || e.level === activeLevel;
       const statusMatch = activeStatus === '全部' || e.status === activeStatus;
       return levelMatch && statusMatch;
     });
-  }, [activeLevel, activeStatus]);
+  }, [activeLevel, activeStatus, embroiderers]);
 
   const handleDispatch = (embroiderer: Embroiderer) => {
+    if (!pendingOrder) {
+      Taro.showToast({ title: '没有待派单的订单', icon: 'none' });
+      return;
+    }
     if (embroiderer.status !== '空闲') {
       Taro.showToast({ title: '该绣娘当前忙碌', icon: 'none' });
       return;
     }
     Taro.showModal({
       title: '确认派单',
-      content: `将订单派发给 ${embroiderer.name}(${embroiderer.level})？`,
+      content: `将「${pendingOrder.sketchName || '定制订单'}」派发给 ${embroiderer.name}(${embroiderer.level})？`,
+      confirmText: '确认派单',
+      confirmColor: '#C41E3A',
       success: (res) => {
         if (res.confirm) {
-          Taro.showToast({ title: '派单成功', icon: 'success' });
-          setPendingOrder(null);
+          const success = dispatchOrder(pendingOrder.id, [embroiderer.id]);
+          if (success) {
+            Taro.showToast({ title: '派单成功', icon: 'success' });
+          }
         }
       }
     });

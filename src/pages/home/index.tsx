@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, Image, Button } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import classnames from 'classnames';
 import StatCard from '@/components/StatCard';
 import SketchCard from '@/components/SketchCard';
 import OrderCard from '@/components/OrderCard';
 import WorkCard from '@/components/WorkCard';
-import { sketchList, categoryList } from '@/data/sketch';
-import { orderList } from '@/data/order';
-import { workList, studyEvents } from '@/data/works';
+import { categoryList } from '@/data/sketch';
+import { studyEvents } from '@/data/works';
+import { useWorkshopStore } from '@/store/workshop';
 
 const quickActions = [
   { id: 'newOrder', name: '新建订单', icon: '📝', bg: 'rgba(196, 30, 58, 0.1)' },
@@ -21,6 +21,10 @@ const quickActions = [
 const HomePage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('绣制中');
+  const { orders, sketches, works, embroiderers } = useWorkshopStore();
+
+  useDidShow(() => {
+  });
 
   const handleAction = (id: string) => {
     switch (id) {
@@ -39,11 +43,26 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const filteredSketches = activeCategory === 'all'
-    ? sketchList.slice(0, 4)
-    : sketchList.filter(s => s.category === activeCategory).slice(0, 4);
+  const filteredSketches = useMemo(() => (
+    activeCategory === 'all'
+      ? sketches.slice(0, 4)
+      : sketches.filter(s => s.category === activeCategory).slice(0, 4)
+  ), [activeCategory, sketches]);
 
-  const filteredOrders = orderList.filter(o => o.status === activeTab).slice(0, 2);
+  const filteredOrders = useMemo(
+    () => orders.filter(o => o.status === activeTab).slice(0, 2),
+    [orders, activeTab]
+  );
+
+  const inProgressCount = useMemo(
+    () => orders.filter(o => o.status === '绣制中').length,
+    [orders]
+  );
+
+  const busyEmbroidererCount = useMemo(
+    () => embroiderers.filter(e => e.status === '忙碌').length,
+    [embroiderers]
+  );
 
   return (
     <ScrollView scrollY className={styles.page} enableBackToTop>
@@ -51,10 +70,10 @@ const HomePage: React.FC = () => {
         <Text className={styles.heroTitle}>锦绣坊</Text>
         <Text className={styles.heroSubtitle}>非遗匠心 · 一针一线 · 传承千年</Text>
         <View className={styles.statGrid}>
-          <StatCard title="进行中订单" value={orderList.filter(o => o.status === '绣制中').length} unit="单" accent="red" />
+          <StatCard title="进行中订单" value={inProgressCount} unit="单" accent="red" />
           <StatCard title="本月营收" value="5.8" unit="万" accent="gold" />
-          <StatCard title="在线绣娘" value={orderList.filter(o => o.status === '绣制中').length + 4} unit="位" accent="brown" />
-          <StatCard title="作品总数" value={workList.length} unit="件" accent="green" />
+          <StatCard title="在线绣娘" value={busyEmbroidererCount} unit="位" accent="brown" />
+          <StatCard title="作品总数" value={works.length} unit="件" accent="green" />
         </View>
       </View>
 
@@ -131,7 +150,7 @@ const HomePage: React.FC = () => {
         </View>
 
         <ScrollView scrollX className={styles.workScroll}>
-          {workList.filter(w => w.status === '在售').slice(0, 4).map(work => (
+          {works.filter(w => w.status === '在售').slice(0, 4).map(work => (
             <View key={work.id} className={styles.workScrollItem}>
               <WorkCard work={work} />
             </View>
