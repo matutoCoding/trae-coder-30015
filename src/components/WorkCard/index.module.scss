@@ -1,0 +1,146 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  height: 400rpx;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+}
+
+.statusWrap {
+  position: absolute;
+  top: $spacing-md;
+  right: $spacing-md;
+}
+
+.content {
+  padding: $spacing-md $spacing-lg $spacing-lg;
+}
+
+.name {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+  margin-bottom: $spacing-xs;
+  @include text-ellipsis;
+}
+
+.tagRow {
+  display: flex;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xs;
+}
+
+.categoryTag {
+  font-size: $font-size-xs;
+  color: $color-primary;
+  background: rgba(196, 30, 58, 0.08);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+}
+
+.processTag {
+  font-size: $font-size-xs;
+  color: $color-secondary-dark;
+  background: rgba(212, 165, 116, 0.12);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+}
+
+.size {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.price {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.embroiderer {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.cardHorizontal {
+  display: flex;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.9;
+  }
+}
+
+.imageHorizontal {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.contentHorizontal {
+  flex: 1;
+  margin-left: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+}
+
+.category {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.footerRow {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.frame {
+  font-size: $font-size-xs;
+  color: $color-tag-frame;
+}

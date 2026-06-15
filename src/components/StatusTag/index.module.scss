@@ -1,0 +1,84 @@
+@use '@/styles/variables.scss' as *;
+
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $radius-sm;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
+
+  &.sm {
+    padding: 4rpx 12rpx;
+    font-size: $font-size-xs;
+  }
+
+  &.md {
+    padding: 6rpx 16rpx;
+    font-size: $font-size-sm;
+  }
+}
+
+.tagText {
+  font-size: inherit;
+}
+
+.pending {
+  background: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+}
+
+.processing {
+  background: rgba(22, 93, 255, 0.1);
+  color: $color-info;
+}
+
+.framing {
+  background: rgba(139, 69, 19, 0.1);
+  color: $color-tag-frame;
+}
+
+.done {
+  background: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+}
+
+.cancelled {
+  background: rgba(134, 144, 156, 0.1);
+  color: $color-text-tertiary;
+}
+
+.success {
+  background: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+}
+
+.warning {
+  background: rgba(255, 125, 0, 0.1);
+  color: $color-warning;
+}
+
+.error {
+  background: rgba(245, 63, 63, 0.1);
+  color: $color-error;
+}
+
+.info {
+  background: rgba(22, 93, 255, 0.1);
+  color: $color-info;
+}
+
+.idle {
+  background: rgba(0, 180, 42, 0.1);
+  color: $color-success;
+}
+
+.busy {
+  background: rgba(245, 63, 63, 0.1);
+  color: $color-error;
+}
+
+.rest {
+  background: rgba(134, 144, 156, 0.1);
+  color: $color-text-tertiary;
+}

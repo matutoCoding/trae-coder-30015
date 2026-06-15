@@ -1,0 +1,70 @@
+@use '@/styles/variables.scss' as *;
+
+.statCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.header {
+  margin-bottom: $spacing-sm;
+}
+
+.title {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: $spacing-xs;
+}
+
+.valueRed {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+  line-height: 1.2;
+}
+
+.valueGold {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-secondary-dark;
+  line-height: 1.2;
+}
+
+.valueBrown {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-tag-silk;
+  line-height: 1.2;
+}
+
+.valueGreen {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-success;
+  line-height: 1.2;
+}
+
+.valueBlue {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-info;
+  line-height: 1.2;
+}
+
+.unit {
+  margin-left: $spacing-xs;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.description {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}

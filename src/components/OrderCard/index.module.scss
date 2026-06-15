@@ -1,0 +1,163 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.9;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.orderNo {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.body {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.sketchImage {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-md;
+  flex-shrink: 0;
+}
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 0;
+}
+
+.sketchName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.customer, .size {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.processRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-top: 4rpx;
+}
+
+.processTag {
+  font-size: $font-size-xs;
+  color: $color-secondary-dark;
+  background: rgba(212, 165, 116, 0.12);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+}
+
+.progressWrap {
+  margin-bottom: $spacing-md;
+  padding: $spacing-sm 0;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.stageText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.progressNum {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.progressBar {
+  height: 12rpx;
+  background: $color-bg-warm;
+  border-radius: $radius-round;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-round;
+  transition: width $transition-slow;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+}
+
+.footerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.budget {
+  font-size: $font-size-xl;
+  color: $color-primary;
+  font-weight: $font-weight-bold;
+}
+
+.deadline {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.embroiderers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: $spacing-xs;
+  max-width: 50%;
+}
+
+.embroiderer {
+  font-size: $font-size-xs;
+  color: $color-secondary-dark;
+  background: $color-bg-warm;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-round;
+}
+
+.noDispatch {
+  font-size: $font-size-xs;
+  color: $color-warning;
+  background: rgba(255, 125, 0, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-round;
+}

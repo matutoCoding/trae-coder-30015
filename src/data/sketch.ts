@@ -1,0 +1,153 @@
+import { Sketch } from '@/types';
+
+export const sketchList: Sketch[] = [
+  {
+    id: 's001',
+    name: '富贵牡丹图',
+    category: 'suxiu',
+    categoryName: '苏绣',
+    process: ['双面绣', '平针绣'],
+    difficulty: 4,
+    estimatedDays: 25,
+    description: '经典苏绣牡丹，寓意富贵吉祥，采用精细丝线渐变绣制，层次分明，栩栩如生。',
+    imageUrl: 'https://picsum.photos/id/106/600/600',
+    tags: ['经典', '花鸟', '高档'],
+    silkColors: ['#FF6B6B', '#FF8E8E', '#FFB4B4', '#FFE4E1', '#228B22', '#32CD32', '#90EE90', '#8B4513'],
+    size: '60cm × 80cm'
+  },
+  {
+    id: 's002',
+    name: '百鸟朝凤',
+    category: 'suxiu',
+    categoryName: '苏绣',
+    process: ['乱针绣', '打籽绣'],
+    difficulty: 5,
+    estimatedDays: 60,
+    description: '苏绣经典题材，百鸟围绕凤凰，象征天下太平，工艺精湛，适合大型厅堂装饰。',
+    imageUrl: 'https://picsum.photos/id/110/600/600',
+    tags: ['大型', '凤凰', '收藏级'],
+    silkColors: ['#FFD700', '#FFA500', '#FF4500', '#DC143C', '#4169E1', '#00CED1', '#98FB98'],
+    size: '120cm × 180cm'
+  },
+  {
+    id: 's003',
+    name: '山水清音图',
+    category: 'xiangxiu',
+    categoryName: '湘绣',
+    process: ['乱针绣'],
+    difficulty: 4,
+    estimatedDays: 45,
+    description: '湘绣山水代表作，运用乱针绣技法表现远山近水，意境深远，墨韵十足。',
+    imageUrl: 'https://picsum.photos/id/1015/600/600',
+    tags: ['山水', '墨色', '意境'],
+    silkColors: ['#2F4F4F', '#556B2F', '#6B8E23', '#8FBC8F', '#D2B48C', '#F5F5DC', '#FFFFFF'],
+    size: '80cm × 120cm'
+  },
+  {
+    id: 's004',
+    name: '岭南木棉红',
+    category: 'yuexiu',
+    categoryName: '粤绣',
+    process: ['平针绣', '盘金绣'],
+    difficulty: 3,
+    estimatedDays: 20,
+    description: '粤绣风格木棉花，色彩艳丽，配合盘金绣勾勒轮廓，岭南风情浓郁。',
+    imageUrl: 'https://picsum.photos/id/1080/600/600',
+    tags: ['岭南', '花卉', '盘金'],
+    silkColors: ['#FF0000', '#DC143C', '#B22222', '#FFD700', '#8B4513', '#228B22', '#90EE90'],
+    size: '50cm × 70cm'
+  },
+  {
+    id: 's005',
+    name: '蜀绣竹林熊猫',
+    category: 'shuxiu',
+    categoryName: '蜀绣',
+    process: ['双面绣', '平针绣'],
+    difficulty: 4,
+    estimatedDays: 35,
+    description: '蜀绣经典题材，憨态可掬的熊猫在竹林间嬉戏，针法细腻，色彩淡雅。',
+    imageUrl: 'https://picsum.photos/id/237/600/600',
+    tags: ['熊猫', '竹林', '四川特色'],
+    silkColors: ['#FFFFFF', '#E8E8E8', '#A9A9A9', '#696969', '#000000', '#228B22', '#90EE90'],
+    size: '60cm × 60cm'
+  },
+  {
+    id: 's006',
+    name: '现代抽象几何',
+    category: 'modern',
+    categoryName: '现代刺绣',
+    process: ['乱针绣'],
+    difficulty: 3,
+    estimatedDays: 15,
+    description: '现代风格抽象几何图案，色彩大胆，线条流畅，适合现代家居装饰。',
+    imageUrl: 'https://picsum.photos/id/1025/600/600',
+    tags: ['现代', '抽象', '简约'],
+    silkColors: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#2C3E50'],
+    size: '40cm × 40cm'
+  },
+  {
+    id: 's007',
+    name: '荷花鸳鸯图',
+    category: 'suxiu',
+    categoryName: '苏绣',
+    process: ['双面绣'],
+    difficulty: 5,
+    estimatedDays: 50,
+    description: '苏绣大师级双面绣作品，正反两面皆可观赏，荷花鸳鸯寓意美好姻缘。',
+    imageUrl: 'https://picsum.photos/id/1043/600/600',
+    tags: ['双面绣', '鸳鸯', '婚庆'],
+    silkColors: ['#FFB6C1', '#FF69B4', '#FFFFFF', '#87CEEB', '#228B22', '#90EE90', '#FFD700'],
+    size: '70cm × 100cm'
+  },
+  {
+    id: 's008',
+    name: '奔马图',
+    category: 'xiangxiu',
+    categoryName: '湘绣',
+    process: ['乱针绣'],
+    difficulty: 5,
+    estimatedDays: 55,
+    description: '湘绣仿徐悲鸿奔马图，乱针绣表现马的鬃毛飘逸，气势磅礴。',
+    imageUrl: 'https://picsum.photos/id/1074/600/600',
+    tags: ['动物', '奔马', '气势'],
+    silkColors: ['#8B4513', '#A0522D', '#CD853F', '#D2B48C', '#F5DEB3', '#2C2C2C', '#FFFFFF'],
+    size: '90cm × 150cm'
+  },
+  {
+    id: 's009',
+    name: '鲤鱼跳龙门',
+    category: 'yuexiu',
+    categoryName: '粤绣',
+    process: ['打籽绣', '平针绣'],
+    difficulty: 4,
+    estimatedDays: 30,
+    description: '粤绣传统吉祥图案，鲤鱼跳跃龙门，寓意步步高升、金榜题名。',
+    imageUrl: 'https://picsum.photos/id/1079/600/600',
+    tags: ['吉祥', '鲤鱼', '祈福'],
+    silkColors: ['#FF4500', '#FF6347', '#FFD700', '#FFA500', '#1E90FF', '#87CEEB', '#FFFFFF'],
+    size: '60cm × 90cm'
+  },
+  {
+    id: 's010',
+    name: '芙蓉锦鲤',
+    category: 'shuxiu',
+    categoryName: '蜀绣',
+    process: ['平针绣', '盘金绣'],
+    difficulty: 3,
+    estimatedDays: 20,
+    description: '蜀绣清新小品，芙蓉花下游动的锦鲤，生机勃勃，富贵有余。',
+    imageUrl: 'https://picsum.photos/id/1084/600/600',
+    tags: ['锦鲤', '芙蓉', '小品'],
+    silkColors: ['#FF6B6B', '#FFB6C1', '#FFFFFF', '#FFA500', '#FFD700', '#228B22', '#87CEEB'],
+    size: '45cm × 45cm'
+  }
+];
+
+export const categoryList = [
+  { id: 'all', name: '全部', count: 10 },
+  { id: 'suxiu', name: '苏绣', count: 3 },
+  { id: 'xiangxiu', name: '湘绣', count: 2 },
+  { id: 'yuexiu', name: '粤绣', count: 2 },
+  { id: 'shuxiu', name: '蜀绣', count: 2 },
+  { id: 'modern', name: '现代', count: 1 }
+];

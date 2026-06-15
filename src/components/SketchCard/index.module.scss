@@ -1,0 +1,108 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  height: 320rpx;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+}
+
+.categoryTag {
+  position: absolute;
+  top: $spacing-md;
+  left: $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+}
+
+.categoryText {
+  font-size: $font-size-xs;
+  color: $color-text-white;
+  font-weight: $font-weight-medium;
+}
+
+.content {
+  padding: $spacing-md $spacing-lg $spacing-lg;
+}
+
+.name {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+  margin-bottom: $spacing-sm;
+  @include text-ellipsis;
+}
+
+.processRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.processTag {
+  background: $color-bg-warm;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+  border: 1rpx solid $color-border;
+}
+
+.processText {
+  font-size: $font-size-xs;
+  color: $color-tag-silk;
+}
+
+.bottomRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.difficulty {
+  display: flex;
+  align-items: center;
+}
+
+.difficultyText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.stars {
+  display: flex;
+}
+
+.star {
+  color: $color-warning;
+  font-size: $font-size-sm;
+}
+
+.starOff {
+  color: $color-border;
+  font-size: $font-size-sm;
+}
+
+.days {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}

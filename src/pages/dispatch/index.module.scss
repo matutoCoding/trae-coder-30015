@@ -1,0 +1,160 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding-bottom: 120rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-secondary-dark 0%, $color-secondary 100%);
+  padding: $spacing-xl $page-padding;
+  color: $color-text-white;
+}
+
+.headerTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-sm;
+}
+
+.headerSubtitle {
+  font-size: $font-size-sm;
+  opacity: 0.9;
+}
+
+.content {
+  padding: $spacing-lg $page-padding;
+}
+
+.section {
+  margin-bottom: $spacing-xl;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  padding-left: $spacing-md;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6rpx;
+    height: 28rpx;
+    background: $color-secondary-dark;
+    border-radius: $radius-round;
+  }
+}
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.filterChip {
+  padding: 12rpx 24rpx;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  border: 2rpx solid transparent;
+  transition: all $transition-base;
+
+  &.active {
+    background: rgba(196, 30, 58, 0.08);
+    border-color: $color-primary;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.pendingOrderCard {
+  background: linear-gradient(135deg, rgba(255, 125, 0, 0.05) 0%, rgba(255, 125, 0, 0.02) 100%);
+  border: 2rpx dashed rgba(255, 125, 0, 0.3);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.orderBadge {
+  display: inline-block;
+  padding: 6rpx 16rpx;
+  background: rgba(255, 125, 0, 0.15);
+  color: $color-warning;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-sm;
+}
+
+.pendingTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.pendingMeta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.metaText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.processRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.processTag {
+  font-size: $font-size-xs;
+  padding: 4rpx 12rpx;
+  background: $color-bg-warm;
+  color: $color-secondary-dark;
+  border-radius: $radius-xs;
+}
+
+.dispatchBtn {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: 16rpx 0;
+  border-radius: $radius-button;
+  text-align: center;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.dispatchBtnText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
+
+.embroidererList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}

@@ -1,0 +1,137 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    opacity: 0.9;
+  }
+}
+
+.header {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: $radius-round;
+  border: 3rpx solid $color-border;
+  flex-shrink: 0;
+}
+
+.basicInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.name {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.experience {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.specialty {
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+}
+
+.label {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-right: $spacing-xs;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-top: $spacing-xs;
+}
+
+.tag {
+  font-size: $font-size-xs;
+  color: $color-tag-process;
+  background: rgba(74, 85, 104, 0.08);
+  padding: 4rpx 12rpx;
+  border-radius: $radius-xs;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.statItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statValue {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.statDivider {
+  width: 1rpx;
+  height: 48rpx;
+  background: $color-divider;
+}
+
+.dispatchBtn {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: 16rpx 0;
+  border-radius: $radius-button;
+  text-align: center;
+  margin-top: $spacing-sm;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+.dispatchText {
+  font-size: $font-size-md;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+}
