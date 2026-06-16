@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView, Image } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { financeList } from '@/data/works';
-import { orderList } from '@/data/order';
-import { embroidererList } from '@/data/embroiderer';
+import { useWorkshopStore } from '@/store/workshop';
 
 const managementMenus = [
   { id: 'silk', name: '丝线色卡库存', desc: '丝线色卡管理、出入库记录', icon: '🧵', bg: 'rgba(139, 69, 19, 0.1)', url: '/pages/silk-inventory/index' },
@@ -15,17 +14,43 @@ const managementMenus = [
 const settingsMenus = [
   { id: 'profile', name: '店铺资料', desc: '锦绣坊信息与介绍', icon: '🏛️', bg: 'rgba(196, 30, 58, 0.08)' },
   { id: 'print', name: '打印标签', desc: '作品标签、收藏证书', icon: '🏷️', bg: 'rgba(212, 165, 116, 0.15)' },
-  { id: 'backup', name: '数据备份', desc: '订单、作品云端备份', icon: '☁️', bg: 'rgba(74, 85, 104, 0.08)' }
+  { id: 'backup', name: '数据备份', desc: '订单、作品云端备份', icon: '☁️', bg: 'rgba(74, 85, 104, 0.08)' },
+  { id: 'reset', name: '重置演示数据', desc: '恢复初始订单、绣娘、库存数据', icon: '🔄', bg: 'rgba(192, 57, 43, 0.08)', reset: true }
 ];
 
 const MinePage: React.FC = () => {
+  const { orders, embroiderers, resetAllData } = useWorkshopStore();
+
+  useDidShow(() => {
+  });
+
   const totalIncome = financeList.filter(f => f.type === 'income').reduce((sum, f) => sum + f.amount, 0);
   const totalExpense = financeList.filter(f => f.type === 'expense').reduce((sum, f) => sum + f.amount, 0);
   const balance = totalIncome - totalExpense;
 
-  const handleMenuClick = (url: string) => {
-    if (url) {
-      Taro.navigateTo({ url });
+  const totalOrders = useMemo(() => orders.length, [orders]);
+  const inProgress = useMemo(() => orders.filter(o => o.status === '绣制中').length, [orders]);
+  const doneCount = useMemo(() => orders.filter(o => o.status === '已完成').length, [orders]);
+  const embCount = useMemo(() => embroiderers.length, [embroiderers]);
+
+  const handleMenuClick = (item: any) => {
+    if (item.reset) {
+      Taro.showModal({
+        title: '重置演示数据',
+        content: '所有订单、派单、进度、丝线库存将恢复初始状态，确定要重置吗？',
+        confirmText: '确认重置',
+        confirmColor: '#C41E3A',
+        success: (res) => {
+          if (res.confirm) {
+            resetAllData();
+            Taro.showToast({ title: '数据已重置', icon: 'success' });
+          }
+        }
+      });
+      return;
+    }
+    if (item.url) {
+      Taro.navigateTo({ url: item.url });
     } else {
       Taro.showToast({ title: '功能开发中', icon: 'none' });
     }
@@ -47,10 +72,10 @@ const MinePage: React.FC = () => {
 
       <View className={styles.statRow}>
         {[
-          { value: orderList.length, label: '总订单' },
-          { value: embroidererList?.length || 8, label: '在册绣娘' },
-          { value: orderList.filter(o => o.status === '绣制中').length, label: '进行中' },
-          { value: orderList.filter(o => o.status === '已完成').length, label: '已完成' }
+          { value: totalOrders, label: '总订单' },
+          { value: embCount, label: '在册绣娘' },
+          { value: inProgress, label: '进行中' },
+          { value: doneCount, label: '已完成' }
         ].map(s => (
           <View key={s.label} className={styles.statItem}>
             <Text className={styles.statNum}>{s.value}</Text>
@@ -104,7 +129,7 @@ const MinePage: React.FC = () => {
           <Text className={styles.sectionTitle}>工坊管理</Text>
           <View className={styles.menuGroup}>
             {managementMenus.map(m => (
-              <View key={m.id} className={styles.menuItem} onClick={() => handleMenuClick(m.url)}>
+              <View key={m.id} className={styles.menuItem} onClick={() => handleMenuClick(m)}>
                 <View className={styles.menuIcon} style={{ background: m.bg }}>
                   <Text>{m.icon}</Text>
                 </View>
@@ -122,7 +147,7 @@ const MinePage: React.FC = () => {
           <Text className={styles.sectionTitle}>设置与工具</Text>
           <View className={styles.menuGroup}>
             {settingsMenus.map(m => (
-              <View key={m.id} className={styles.menuItem} onClick={() => handleMenuClick('')}>
+              <View key={m.id} className={styles.menuItem} onClick={() => handleMenuClick(m)}>
                 <View className={styles.menuIcon} style={{ background: m.bg }}>
                   <Text>{m.icon}</Text>
                 </View>

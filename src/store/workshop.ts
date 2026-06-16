@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import Taro from '@tarojs/taro';
 import { Order, Embroiderer, SilkThread, SilkRecord, Sketch, Work, ProgressStage, ProcessType, Customer } from '@/types';
 import { orderList } from '@/data/order';
 import { embroidererList } from '@/data/embroiderer';
@@ -7,6 +8,49 @@ import { sketchList } from '@/data/sketch';
 import { workList } from '@/data/works';
 import dayjs from 'dayjs';
 
+const STORAGE_KEY = 'jinxiu_workshop_state_v1';
+
+interface PersistState {
+  orders: Order[];
+  embroiderers: Embroiderer[];
+  silkThreads: SilkThread[];
+  silkRecords: SilkRecord[];
+  orderCounter: number;
+  savedAt: string;
+}
+
+const loadPersistedState = (): Partial<PersistState> | null => {
+  try {
+    if (typeof Taro.getStorageSync === 'function') {
+      const raw = Taro.getStorageSync(STORAGE_KEY);
+      if (raw) {
+        return typeof raw === 'string' ? JSON.parse(raw) : raw;
+      }
+    }
+  } catch (e) {
+    console.warn('[workshop store] load failed', e);
+  }
+  return null;
+};
+
+const savePersistedState = (state: WorkshopState) => {
+  try {
+    const toSave: PersistState = {
+      orders: state.orders,
+      embroiderers: state.embroiderers,
+      silkThreads: state.silkThreads,
+      silkRecords: state.silkRecords,
+      orderCounter: (state as any)._orderCounter || 100,
+      savedAt: dayjs().format('YYYY-MM-DD HH:mm:ss')
+    };
+    if (typeof Taro.setStorageSync === 'function') {
+      Taro.setStorageSync(STORAGE_KEY, JSON.stringify(toSave));
+    }
+  } catch (e) {
+    console.warn('[workshop store] save failed', e);
+  }
+};
+
 interface WorkshopState {
   orders: Order[];
   embroiderers: Embroiderer[];
@@ -14,6 +58,7 @@ interface WorkshopState {
   silkRecords: SilkRecord[];
   sketches: Sketch[];
   works: Work[];
+  _orderCounter: number;
 
   addOrder: (order: Omit<Order, 'id' | 'orderNo' | 'createTime' | 'status' | 'progress' | 'currentStage' | 'stageLogs'> & { customer: Customer }) => string;
   getOrderById: (id: string) => Order | undefined;
@@ -27,23 +72,31 @@ interface WorkshopState {
   addSilkStock: (silkId: string, quantity: number, operator: string, note?: string) => boolean;
   deductSilkStock: (silkId: string, quantity: number, operator: string, orderNo?: string, note?: string) => boolean;
   getSilkById: (id: string) => SilkThread | undefined;
+
+  resetAllData: () => void;
 }
 
-let orderCounter = 100;
+const persisted = loadPersistedState();
+const initialOrders = persisted?.orders && persisted.orders.length > 0 ? persisted.orders : [...orderList];
+const initialEmbroiderers = persisted?.embroiderers && persisted.embroiderers.length > 0 ? persisted.embroiderers : [...embroidererList];
+const initialSilkThreads = persisted?.silkThreads && persisted.silkThreads.length > 0 ? persisted.silkThreads : [...silkList];
+const initialSilkRecords = persisted?.silkRecords && persisted.silkRecords.length > 0 ? persisted.silkRecords : [...silkRecords];
+const initialCounter = persisted?.orderCounter || 100;
 
 export const useWorkshopStore = create<WorkshopState>((set, get) => ({
-  orders: [...orderList],
-  embroiderers: [...embroidererList],
-  silkThreads: [...silkList],
-  silkRecords: [...silkRecords],
+  orders: initialOrders,
+  embroiderers: initialEmbroiderers,
+  silkThreads: initialSilkThreads,
+  silkRecords: initialSilkRecords,
   sketches: [...sketchList],
   works: [...workList],
+  _orderCounter: initialCounter,
 
   addOrder: (orderData) => {
-    orderCounter++;
+    let newCounter = get()._orderCounter + 1;
     const newOrder: Order = {
       id: `order_${Date.now()}`,
-      orderNo: `JX${dayjs().format('YYYYMMDD')}${String(orderCounter).padStart(3, '0')}`,
+      orderNo: `JX${dayjs().format('YYYYMMDD')}${String(newCounter).padStart(3, '0')}`,
       status: '待派单',
       progress: 0,
       currentStage: '准备',
@@ -53,7 +106,14 @@ export const useWorkshopStore = create<WorkshopState>((set, get) => ({
       createTime: dayjs().format('YYYY-MM-DD HH:mm'),
       ...orderData
     };
-    set(state => ({ orders: [newOrder, ...state.orders] }));
+    set(state => {
+      const next = {
+        orders: [newOrder, ...state.orders],
+        _orderCounter: newCounter
+      };
+      savePersistedState({ ...state, ...next });
+      return next;
+    });
     return newOrder.id;
   },
 
@@ -71,28 +131,32 @@ export const useWorkshopStore = create<WorkshopState>((set, get) => ({
 
     const embroidererData = selectedEmbroiderers.map(e => ({ id: e.id, name: e.name }));
 
-    set(state => ({
-      orders: state.orders.map(o =>
-        o.id === orderId
-          ? {
-              ...o,
-              status: '绣制中',
-              embroiderers: embroidererData,
-              currentStage: '上绷',
-              progress: 15,
-              stageLogs: [
-                ...o.stageLogs,
-                { stage: '上绷', time: dayjs().format('YYYY-MM-DD HH:mm'), note: `已派单给${selectedEmbroiderers.map(e => e.name).join('、')}，开始上绷准备` }
-              ]
-            }
-          : o
-      ),
-      embroiderers: state.embroiderers.map(e =>
-        embroidererIds.includes(e.id)
-          ? { ...e, status: '忙碌', currentTaskCount: e.currentTaskCount + 1 }
-          : e
-      )
-    }));
+    set(state => {
+      const next = {
+        orders: state.orders.map(o =>
+          o.id === orderId
+            ? {
+                ...o,
+                status: '绣制中',
+                embroiderers: embroidererData,
+                currentStage: '上绷',
+                progress: 15,
+                stageLogs: [
+                  ...o.stageLogs,
+                  { stage: '上绷', time: dayjs().format('YYYY-MM-DD HH:mm'), note: `已派单给${selectedEmbroiderers.map(e => e.name).join('、')}，开始上绷准备` }
+                ]
+              }
+            : o
+        ),
+        embroiderers: state.embroiderers.map(e =>
+          embroidererIds.includes(e.id)
+            ? { ...e, status: '忙碌', currentTaskCount: e.currentTaskCount + 1 }
+            : e
+        )
+      };
+      savePersistedState({ ...state, ...next });
+      return next;
+    });
     return true;
   },
 
@@ -129,37 +193,45 @@ export const useWorkshopStore = create<WorkshopState>((set, get) => ({
       note
     };
 
-    set(state => ({
-      orders: state.orders.map(o =>
-        o.id === orderId
-          ? {
-              ...o,
-              currentStage: stage,
-              progress: stageProgressMap[stage],
-              status: newStatus,
-              stageLogs: [...o.stageLogs, newLog]
-            }
-          : o
-      )
-    }));
+    set(state => {
+      const next = {
+        orders: state.orders.map(o =>
+          o.id === orderId
+            ? {
+                ...o,
+                currentStage: stage,
+                progress: stageProgressMap[stage],
+                status: newStatus,
+                stageLogs: [...o.stageLogs, newLog]
+              }
+            : o
+        )
+      };
+      savePersistedState({ ...state, ...next });
+      return next;
+    });
 
     return true;
   },
 
   addStageLog: (orderId, stage, note) => {
-    set(state => ({
-      orders: state.orders.map(o =>
-        o.id === orderId
-          ? {
-              ...o,
-              stageLogs: [
-                ...o.stageLogs,
-                { stage, time: dayjs().format('YYYY-MM-DD HH:mm'), note }
-              ]
-            }
-          : o
-      )
-    }));
+    set(state => {
+      const next = {
+        orders: state.orders.map(o =>
+          o.id === orderId
+            ? {
+                ...o,
+                stageLogs: [
+                  ...o.stageLogs,
+                  { stage, time: dayjs().format('YYYY-MM-DD HH:mm'), note }
+                ]
+              }
+            : o
+        )
+      };
+      savePersistedState({ ...state, ...next });
+      return next;
+    });
   },
 
   addSilkStock: (silkId, quantity, operator, note = '采购入库') => {
@@ -178,12 +250,16 @@ export const useWorkshopStore = create<WorkshopState>((set, get) => ({
       note
     };
 
-    set(state => ({
-      silkThreads: state.silkThreads.map(s =>
-        s.id === silkId ? { ...s, stock: s.stock + quantity } : s
-      ),
-      silkRecords: [newRecord, ...state.silkRecords]
-    }));
+    set(state => {
+      const next = {
+        silkThreads: state.silkThreads.map(s =>
+          s.id === silkId ? { ...s, stock: s.stock + quantity } : s
+        ),
+        silkRecords: [newRecord, ...state.silkRecords]
+      };
+      savePersistedState({ ...state, ...next });
+      return next;
+    });
     return true;
   },
 
@@ -207,16 +283,35 @@ export const useWorkshopStore = create<WorkshopState>((set, get) => ({
       note
     };
 
-    set(state => ({
-      silkThreads: state.silkThreads.map(s =>
-        s.id === silkId ? { ...s, stock: s.stock - quantity } : s
-      ),
-      silkRecords: [newRecord, ...state.silkRecords]
-    }));
+    set(state => {
+      const next = {
+        silkThreads: state.silkThreads.map(s =>
+          s.id === silkId ? { ...s, stock: s.stock - quantity } : s
+        ),
+        silkRecords: [newRecord, ...state.silkRecords]
+      };
+      savePersistedState({ ...state, ...next });
+      return next;
+    });
     return true;
   },
 
   getSilkById: (id) => {
     return get().silkThreads.find(s => s.id === id);
+  },
+
+  resetAllData: () => {
+    try {
+      if (typeof Taro.removeStorageSync === 'function') {
+        Taro.removeStorageSync(STORAGE_KEY);
+      }
+    } catch (e) {}
+    set({
+      orders: [...orderList],
+      embroiderers: [...embroidererList],
+      silkThreads: [...silkList],
+      silkRecords: [...silkRecords],
+      _orderCounter: 100
+    });
   }
 }));

@@ -358,9 +358,17 @@ const OrderDetailPage: React.FC = () => {
       <View className={styles.actionBar}>
         <View
           className={`${styles.actionBtn} ${styles.secondary}`}
+          style={{ flex: 0.9 }}
           onClick={() => Taro.showToast({ title: '联系客户功能开发中', icon: 'none' })}
         >
           联系客户
+        </View>
+        <View
+          className={`${styles.actionBtn} ${styles.secondary}`}
+          style={{ flex: 0.9 }}
+          onClick={handleAddLog}
+        >
+          补日志
         </View>
         {order.status === '待派单' ? (
           <View
@@ -385,6 +393,13 @@ const OrderDetailPage: React.FC = () => {
             }}
           >
             通知装裱
+          </View>
+        ) : order.status === '已完成' ? (
+          <View
+            className={`${styles.actionBtn} ${styles.primary}`}
+            onClick={() => Taro.showToast({ title: '客户已通知取件', icon: 'success' })}
+          >
+            通知取件
           </View>
         ) : (
           <View
